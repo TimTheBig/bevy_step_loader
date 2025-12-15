@@ -1,0 +1,24 @@
+[package]
+name = "bevy_step_loader"
+version = "0.17.0"
+edition = "2024"
+description = "STEP/STP loader for bevy, based on foxtrot"
+license = "MIT OR Apache-2.0"
+
+keywords = ["step", "cad", "bevy", "mesh"]
+repository = "https://github.com/TimTheBig/bevy_step_loader"
+readme = "README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = { version = "0.17", default-features = false, features = [
+    "bevy_asset",
+    "bevy_render",
+] }
+thiserror = "2.0"
+
+# STEP parser
+foxtrot_step = { version = "0.1", git = "https://github.com/TimTheBig/foxtrot", package = "step" }
+# STEP triangulation
+foxtrot_tri = { version = "0.1", git = "https://github.com/TimTheBig/foxtrot", package = "triangulate" }
