@@ -3,10 +3,11 @@
 use thiserror::Error;
 
 use bevy::{
+    prelude::*,
     asset::{AssetLoader, LoadContext, RenderAssetUsages, io::Reader},
     mesh::{Indices, Mesh, VertexAttributeValues},
-    prelude::*,
-    render::render_resource::PrimitiveTopology, tasks::AsyncComputeTaskPool,
+    render::render_resource::PrimitiveTopology,
+    tasks::AsyncComputeTaskPool,
 };
 use foxtrot_step::step_file::StepFile;
 
@@ -35,13 +36,15 @@ impl AssetLoader for StepLoader {
         let mut bytes = Vec::new();
         reader.read_to_end(&mut bytes).await?;
 
-        Ok(AsyncComputeTaskPool::try_get().ok_or(StepError::NoAsyncComputeTaskPool)?
-        .spawn(async move {
-            let flatten = StepFile::strip_flatten(&bytes);
-            let step = StepFile::parse(&flatten);
+        Ok(AsyncComputeTaskPool::try_get()
+            .ok_or(StepError::NoAsyncComputeTaskPool)?
+            .spawn(async move {
+                let flatten = StepFile::strip_flatten(&bytes);
+                let step = StepFile::parse(&flatten);
 
-            step_to_triangle_mesh(&step)
-        }).await)
+                step_to_triangle_mesh(&step)
+            }).await
+        )
     }
 
     fn extensions(&self) -> &[&str] {
@@ -55,7 +58,7 @@ pub enum StepError {
     #[error("Failed to load STEP")]
     Io(#[from] std::io::Error),
     #[error("AsyncComputeTaskPool must be initialized before loading a STEP model")]
-    NoAsyncComputeTaskPool
+    NoAsyncComputeTaskPool,
 }
 
 fn step_to_triangle_mesh(step: &StepFile) -> Mesh {
@@ -100,10 +103,7 @@ fn step_to_triangle_mesh(step: &StepFile) -> Mesh {
         VertexAttributeValues::Float32x3(colors),
     );
 
-    bevy_mesh.insert_attribute(
-        Mesh::ATTRIBUTE_UV_0,
-        VertexAttributeValues::Float32x2(uvs)
-    );
+    bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, VertexAttributeValues::Float32x2(uvs));
     bevy_mesh.insert_indices(Indices::U32(indices));
 
     bevy_mesh
